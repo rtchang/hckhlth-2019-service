@@ -8,10 +8,14 @@ const app = express()
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs')
   .get('/', (req, res) => res.render('pages/index'))
-  .use((req, res, next) => {
-	res.header('Content-Type', 'application/json');
-	next()
-  }).get(`/api/member`, (req, res) => {
-	res.send(JSON.stringify(new Member('fake', 'PATIENT', 'Neil Gandhi', 'super-amazing-person@test.com')));
+
+app.use((req, res, next) => {
+  res.header('Content-Type', 'application/json');
+  next()
+  })
+
+app.get(`/api/member`, (req, res) => {
+  res.send(JSON.stringify(new Member('fake', 'PATIENT', 'Neil Gandhi', 'super-amazing-person@test.com')));
 })
-  .listen(PORT, () => console.log(`Listening on ${ PORT }`))
+ 
+ app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
