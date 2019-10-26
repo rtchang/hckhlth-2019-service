@@ -18,4 +18,4 @@ app.get(`/api/member`, (req, res) => {
   res.send(JSON.stringify(new Member('fake', 'PATIENT', 'Neil Gandhi', 'super-amazing-person@test.com')));
 })
  
- app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
+app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
