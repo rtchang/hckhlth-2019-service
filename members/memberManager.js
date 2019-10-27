@@ -49,12 +49,12 @@ module.exports = class MemberManager {
 				id: 5,
 				name: 'Doctor Appointment',
 				time: 1572150138,
-				likes: 0
+				likes: {}
 			}, {
 				id: 1,
 				name: 'Like Honey Badger Badge',
 				time: 1571545338,
-				likes: 0
+				likes: {}
 			}]
 		}
 	}
@@ -69,6 +69,36 @@ module.exports = class MemberManager {
 
 	getTimeline(userId) {
 		return this.timeline[userId]
+	}
+
+	addEvent(userId, name, time) {
+		const timeline = this.timeline[userId]
+
+		if (timeline == null) {
+			throw new Exception("Timeline for user " + userId " not found")
+		}
+
+		timeline.push({
+			id: uuidv4(),
+			name,
+			time,
+			likes: {}
+		})
+	}
+
+	likeEvent(fromUserId, forUserId, eventId) {
+		const userTimeline = this.timeline[forUserId]
+		if (userTimeline == null) {
+			throw new Exception("User " + forUserId + " not found")
+		}
+
+		const event = userTimeline[eventId]
+
+		if (event == null) {
+			throw new Exception("Event " + eventId + " not found")
+		}
+
+		event.likes[fromUserId] = true
 	}
 
 	getDoses(userId) {

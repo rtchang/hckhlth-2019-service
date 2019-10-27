@@ -24,6 +24,23 @@ module.exports = class MemberController {
 		})
 	}
 
+	addEvent() {
+		this.app.put('/api/member/:userId/timeline', (req, res) => {
+			const params = req.params
+			const { userId } = params
+			const { name, time } = req.body		
+
+			try {
+				this.memberManager.addEvent(userId, name, time)
+			} catch (exception) {
+				res.status(404).end()
+				return
+			}
+
+			res.sendStatus(200)
+		})
+	}
+
 	getTimeline() {
 		this.app.get('/api/member/:userId/timeline', (req, res) => {
 			const params = req.params
@@ -32,6 +49,24 @@ module.exports = class MemberController {
 			const timeline = this.memberManager.getTimeline(userId)
 
 			res.send(JSON.stringify(timeline));
+		})
+	}
+
+	likeEvent() {
+		this.app.put('/api/member/:userId/like', (req, res) => {
+			const params = req.params
+			const { userId } = params
+
+			const { forUserId, eventId } = req.body			
+
+			try {
+				this.memberManager.likeEvent(userId, forUserId, event)
+			} catch (exception) {
+				res.status(404).end()
+				return
+			}
+
+			res.sendStatus(200)
 		})
 	}
 
