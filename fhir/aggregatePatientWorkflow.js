@@ -1,7 +1,7 @@
 const https = require('https')
 const Config = require('../config.js')
 const { FHIR_URL } = Config
-const MemberManager = require('../member/memberManager.js')
+const MemberManager = require('../members/memberManager.js')
 
 // the intent of this is to grab things via Fhir
 module.exports = class AggregatePatientWorkflow {

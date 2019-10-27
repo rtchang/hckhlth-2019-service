@@ -42,31 +42,16 @@ module.exports = class MemberManager {
 		}
 
 		this.externalIdentifiers = {
-
-		}
-
-		this.dashboard = {
-			'fake': {
-				'hba1c': 8.1,
-				'glucose_average': 186,
-				'glucose_deviation': 71,
-				'hypos': '4%',
-				'hypers': '51%',
-				'hypo': '80',
-				'hyper': '180'
-			}
 		}
 
 		this.glucose = {
-			'fake': {
-
-			}
+			'fake': []
 		}
 
 		this.timeline = {
 			'fake': [{
 				id: 5,
-				name: 'Doctor Appointment',
+				name: 'Hit a 30 Day Streak milestone',
 				time: 1572150138,
 				likes: {}
 			}, {
@@ -82,6 +67,8 @@ module.exports = class MemberManager {
 		const userId = uuidv4()
 		const user = new Member(userId, 'PATIENT', name, email || '', identifier)
 		this.patients[userId] = user
+		this.glucose[userId] = []
+		this.timeline[userId] = []
 
 		if (identifier != null) {
 			this.externalIdentifiers[identifier] = user
@@ -97,7 +84,34 @@ module.exports = class MemberManager {
 	}
 
 	getUserDashboard(userId) {
-		return this.dashboard[userId]
+		const glucoseLevels = this.glucose[userId]
+
+		if (!glucoseLevels) {
+			return {}
+		}
+
+		const hypers = glucoseLevels.reduce((acc, val) => {
+			acc += val.amount > high
+			return acc
+		}, 0)
+		const hypos = glucoseLevels.reduce((acc, val) => {
+			acc += val.amount < low
+			return acc
+		}, 0)
+		const average = glucoseLevels.reduce((acc, val) => {
+			acc += val
+		}, 0)/glucoseLevels.length || 0
+		const highest = Math.max(...glucoseLevels)
+		const lowest = Math.min(...glucoseLevels)
+		const deviation = (highest - lowest) || 0
+
+		return {
+			average,
+			deviation,
+			hypers,
+			hypos,
+			glucoseLevels
+		}
 	}
 
 	getTimeline(userId) {
@@ -173,10 +187,11 @@ module.exports = class MemberManager {
 	}
 
 	addGlucoseReading(userId, amount, low, high, interpretation, time) {
-		this.glucose[userId] = {
+		const glucose = this.glucose[userId] || []
+		this.glucose[userId].push({
 			id: uuidv4(),
 			amount, low, high, interpretation, time
-		}
+		})
 	}
 }
 
@@ -190,7 +205,6 @@ function getDoseFhir() {
 	}
 }
 
-// TODO(fully test this against real data)
 function handleFhir(method, path, payload) {
 	const req = https.request({
 		hostname: FHIR_URL + path,
