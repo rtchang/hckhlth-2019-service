@@ -2,8 +2,8 @@ const Member = require('./member.js')
 const Dose = require('./dose.js')
 const FhirAdapter = require('../fhir/fhirAdapter.js')
 const https = require('https')
-
-const FHIR_URL = 'https://fhir-hlth.azurehealthcareapis.com/'
+const Config = require('../config.js')
+const { FHIR_URL } = Config
 
 module.exports = class MemberManager {
 	constructor() {
@@ -37,6 +37,14 @@ module.exports = class MemberManager {
 			}
 		}
 
+		this.patients = {
+			'fake': new Member('fake', 'PATIENT', 'Neil Gandhi', 'super-amazing-person@test.com')
+		}
+
+		this.externalIdentifiers = {
+
+		}
+
 		this.dashboard = {
 			'fake': {
 				'hba1c': 8.1,
@@ -46,6 +54,12 @@ module.exports = class MemberManager {
 				'hypers': '51%',
 				'hypo': '80',
 				'hyper': '180'
+			}
+		}
+
+		this.glucose = {
+			'fake': {
+
 			}
 		}
 
@@ -64,8 +78,22 @@ module.exports = class MemberManager {
 		}
 	}
 
+	createPatient(name, email, identifier) {
+		const userId = uuidv4()
+		const user = new Member(userId, 'PATIENT', name, email || '', identifier)
+		this.patients[userId] = user
+
+		if (identifier != null) {
+			this.externalIdentifiers[identifier] = user
+		}
+	}
+
+	getPatientByIdentifier(identifier) {
+		return this.externalIdentifiers[identifier]
+	}
+
 	getUser(userId) {
-		return new Member(userId, 'PATIENT', 'Neil Gandhi', 'super-amazing-person@test.com')
+		return this.patients[userId]
 	}
 
 	getUserDashboard(userId) {
@@ -142,6 +170,13 @@ module.exports = class MemberManager {
 		}
 
 		delete this.doses[userId][doseId]
+	}
+
+	addGlucoseReading(userId, amount, low, high, interpretation, time) {
+		this.glucose[userId] = {
+			id: uuidv4(),
+			amount, low, high, interpretation, time
+		}
 	}
 }
 

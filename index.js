@@ -3,6 +3,8 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const path = require('path')
 const PORT = process.env.PORT || 5000
+const AggregatePatientWorkflow = require('./fhir/aggregatePatientWorkflow.js')
+const AggregateGlucoseWorkflow = require('./fhir/aggregateGlucoseWorkflow.js')
 
 const app = express()
   .use(bodyParser.urlencoded({ extended: false }))
@@ -33,5 +35,23 @@ memberApi.getDoses()
 memberApi.addDose()
 memberApi.updateDose()
 memberApi.removeDose()
+
+app.get('/start-aggregate-patient-workflow', (req, res) => {
+  const { source } = req.body
+
+  const aggregatePatientWorkflow = AggregatePatientWorkflow(source)
+
+  aggregatePatientWorkflow.execute()
+  res.sendStatus(201)
+})
+
+app.get('/start-aggregate-glucose-workflow', (req, res) => {
+  const { source } = req.body
+
+  const AggregateGlucoseWorkflow = AggregateGlucoseWorkflow(source)
+
+  aggregatePatientWorkflow.execute()
+  res.sendStatus(201)
+})
 
 app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
