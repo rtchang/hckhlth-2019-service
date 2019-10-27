@@ -1,6 +1,6 @@
 module.exports = class Member {
-	constructor(uuid, type, name, email, identifier, birthDate, locale, income, gender) {
-		this.uuid = uuid
+	constructor(id, type, name, email, identifier, birthDate, locale, income, gender) {
+		this.id = id
 		this.type = type || 'NONE'	// PATIENT | CARE_TAKER | ADMIN | NONE
 		this.name = name
 		this.email = email // some email,

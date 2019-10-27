@@ -3,7 +3,9 @@ const Dose = require('./dose.js')
 const FhirAdapter = require('../fhir/fhirAdapter.js')
 const https = require('https')
 const Config = require('../config.js')
-const { FHIR_URL } = Config
+const { FHIR_URL, MONGO_CLIENT_URL } = Config
+const MongoClient = require('mongodb').MongoClient
+const url = MONGO_CLIENT_URL
 
 module.exports = class MemberManager {
 	constructor() {
@@ -234,11 +236,11 @@ module.exports = class MemberManager {
 			}
 
 			if (otherPatient.locale == patient.locale && (patient.age > otherPatient.age - 3 && patient.age < otherPatient.age + 3)) {
-				similar.push(otherPatient.uuid)
+				similar.push(otherPatient.id)
 			} else if (otherPatient.age == patient.age) {
-				similar.push(otherPatient.uuid)
+				similar.push(otherPatient.id)
 			} else if (patient.income > otherPatient.income - 5000 && patient.income < otherPatient.income + 5000) {
-				similar.push(otherPatient.uuid)
+				similar.push(otherPatient.id)
 			}
 		}
 
