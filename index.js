@@ -17,7 +17,7 @@ const azureAuth = new ClientOAuth2({
   accessTokenUri: 'https://login.microsoftonline.com/79fe009c-79e0-4bc9-baec-a76d3145bde5/oauth2/token',
   authorizationUri: 'https://login.microsoftonline.com/79fe009c-79e0-4bc9-baec-a76d3145bde5/oauth2/authorize?resource=https://azurehealthcareapis.com',
   redirectUri: 'https://hlth.azurewebsites.net/auth/azure/callback',
-  scopes: ['notifications', 'gist']
+  scopes: []
 })
 
 const app = express()
