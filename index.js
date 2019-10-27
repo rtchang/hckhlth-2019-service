@@ -1,4 +1,5 @@
 const Member = require('./members/member.js')
+const MemberApi = require('./members/memberApi.js')
 const express = require('express')
 const path = require('path')
 const PORT = process.env.PORT || 5000
@@ -14,8 +15,6 @@ app.use((req, res, next) => {
   next()
   })
 
-app.get(`/api/member`, (req, res) => {
-  res.send(JSON.stringify(new Member('fake', 'PATIENT', 'Neil Gandhi', 'super-amazing-person@test.com')));
-})
- 
+const memberApi = new MemberApi(app)
+
 app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
