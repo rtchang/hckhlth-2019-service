@@ -75,7 +75,7 @@ module.exports = class MemberManager {
 		const timeline = this.timeline[userId]
 
 		if (timeline == null) {
-			throw new Exception("Timeline for user " + userId " not found")
+			throw new Exception("Timeline for user " + userId + " not found")
 		}
 
 		timeline.push({
