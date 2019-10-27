@@ -98,6 +98,17 @@ module.exports = class MemberController {
 		})
 	}
 
+	updateIncome() {
+		this.app.put('/api/member/:userId/income', (req, res) => {
+			const params = req.params
+			const { userId } = params
+			const { amount } = req.body
+
+			this.memberManager.updateIncome(userId, amount)
+			res.sendStatus(200)
+		})
+	}
+
 	updateDose() {
 		this.app.put('/api/member/:userId/dose/:doseId/amount', (req, res) => {
 			const params = req.params

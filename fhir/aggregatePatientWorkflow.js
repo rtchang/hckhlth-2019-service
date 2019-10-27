@@ -29,19 +29,22 @@ function fetchData(memberManager, source) {
 		res.on('data', (data) => {
 			mapPartials(data)
 				.forEach(memberInfo => {
-					memberManager.create(memberInfo.name, memberInfo.email, memberInfo.identifier)
+					memberManager.create(memberInfo.name, memberInfo.email, memberInfo.identifier, memberInfo.birthDate, memberInfo.locale, null, memberInfo.gender)
 				})
 		})
 	})
 }
 
 function mapPartials(raw) {
-	const { name, telecom, identifier } = raw
+	const { name, telecom, identifier, gender, address, birthDate } = raw
 	const fullName = (name[0] || {}).given + ' ' + (name[0] || {}).family
 	return {
 		name: fullName,
 		email: extractEmailIfPossible(telecom),
-		identifier: [(identifier[0] || {}).system, (identifier[0] || {}).value].join('::')
+		identifier: [(identifier[0] || {}).system, (identifier[0] || {}).value].join('::'),
+		gender,
+		locale: address.text,
+		birthDate: birthDate,
 	}
 }
 

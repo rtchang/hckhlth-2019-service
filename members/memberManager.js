@@ -38,7 +38,7 @@ module.exports = class MemberManager {
 		}
 
 		this.patients = {
-			'fake': new Member('fake', 'PATIENT', 'Neil Gandhi', 'super-amazing-person@test.com')
+			'fake': new Member('fake', 'PATIENT', 'Neil Gandhi', 'super-amazing-person@test.com', null, 34, 'Dublin, CA', 'HIGH', 'MALE')
 		}
 
 		this.externalIdentifiers = {
@@ -63,9 +63,18 @@ module.exports = class MemberManager {
 		}
 	}
 
-	createPatient(name, email, identifier) {
+	createPatient(name, email, identifier, age, locale, income, gender) {
 		const userId = uuidv4()
-		const user = new Member(userId, 'PATIENT', name, email || '', identifier)
+		const user = new Member(
+			userId,
+			'PATIENT',
+			name,
+			email || '',
+			identifier,
+			age,
+			locale,
+			income,
+			gender)
 		this.patients[userId] = user
 		this.glucose[userId] = []
 		this.timeline[userId] = []
@@ -81,6 +90,10 @@ module.exports = class MemberManager {
 
 	getUser(userId) {
 		return this.patients[userId]
+	}
+
+	updateIncome(userId, income) {
+		this.patients[userId].income = income
 	}
 
 	getUserDashboard(userId) {
@@ -192,6 +205,13 @@ module.exports = class MemberManager {
 			id: uuidv4(),
 			amount, low, high, interpretation, time
 		})
+	}
+
+	// TODO(replace this messiness with an actual structured data store please!)
+	// TODO(also instead of doing some magical heurstic, apply this to ai/ml to get better at finding similar people)
+	findSimilar(userId) {
+		const patient = this.patients[userId]
+		const { age, income, locale, gender } = patient
 	}
 }
 

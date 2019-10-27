@@ -36,6 +36,7 @@ memberApi.getDoses()
 memberApi.addDose()
 memberApi.updateDose()
 memberApi.removeDose()
+memberApi.updateIncome()
 
 // not-restful-things below -- these should be triggered via scenarios/jobs/events -- just exposing it for testing purposes
 app.get('/start-aggregate-patient-workflow', (req, res) => {
