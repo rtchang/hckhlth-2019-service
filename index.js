@@ -13,12 +13,11 @@ const memberManager = new MemberManager()
 const ClientOAuth2 = require('client-oauth2')
 
 const azureAuth = new ClientOAuth2({
-  clientId: Config.clientId,
-  clientSecret: Config.cliientSecret,
+  clientId: Config.CLIENT_ID,
+  clientSecret: Config.CLIENT_SECRET,
   accessTokenUri: 'https://login.microsoftonline.com/79fe009c-79e0-4bc9-baec-a76d3145bde5/oauth2/token',
   authorizationUri: 'https://login.microsoftonline.com/79fe009c-79e0-4bc9-baec-a76d3145bde5/oauth2/authorize?resource=https://azurehealthcareapis.com',
-  redirectUri: 'http://localhost:5000/auth/azure/callback',
-//  redirectUri: 'https://hlth.azurewebsites.net/auth/azure/callback',
+  redirectUri: 'https://hlth.azurewebsites.net/auth/azure/callback',
   scopes: ['notifications', 'gist']
 })
 
@@ -58,7 +57,7 @@ app.get('/start-aggregate-patient-workflow', (req, res) => {
   const { source } = req.body
 
   if (source == null) {
-    sign('get', Config.FHIR_URL + "Patient")
+    sign('get', Config.FHIR_URL)
       .then(accessToken => {
         const aggregatePatientWorkflow = new AggregatePatientWorkflow(source, memberManager)
 
@@ -101,7 +100,7 @@ app.get('/auth/azure/callback', function (req, res) {
 function sign(method, url) {
   return new Promise((resolve, reject) => {
     console.log('what is going on', url)
-    azureAuth.code.getToken('https://hlth.azurewebsites.net/auth/azure/callback')
+    azureAuth.code.getToken(url)
       .then(function (user) {
         console.log(user) //=> { accessToken: '...', tokenType: 'bearer', ... }
    
@@ -114,7 +113,7 @@ function sign(method, url) {
         // Sign API requests on behalf of the current user.
         user.sign({
           method,
-          url
+          url: 'https://hlth.azurewebsites.net/auth/azure/callback'
         })
 
         resolve(user.accessToken)
