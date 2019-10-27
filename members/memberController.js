@@ -141,4 +141,14 @@ module.exports = class MemberController {
 			res.sendStatus(200)
 		})
 	}
+
+	getPeerMetrics() {
+		this.app.get('/api/member/:userId/peers', (req, res) => {
+			const params = req.params
+			const { userId } = params
+
+			const metrics = this.memberManager.getPeerMetrics(userId)
+			res.send(JSON.stringify(metrics));
+		})
+	}
 }

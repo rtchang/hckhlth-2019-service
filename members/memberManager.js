@@ -38,7 +38,7 @@ module.exports = class MemberManager {
 		}
 
 		this.patients = {
-			'fake': new Member('fake', 'PATIENT', 'Neil Gandhi', 'super-amazing-person@test.com', null, 34, 'Dublin, CA', 'HIGH', 'MALE')
+			'fake': new Member('fake', 'PATIENT', 'Neil Gandhi', 'super-amazing-person@test.com', null, 34, 'Dublin, CA', '10000', 'MALE')
 		}
 
 		this.externalIdentifiers = {
@@ -96,8 +96,8 @@ module.exports = class MemberManager {
 		this.patients[userId].income = income
 	}
 
-	getUserDashboard(userId) {
-		const glucoseLevels = this.glucose[userId]
+	getUserDashboard(userId, glucoseLevels) {
+		glucoseLevels = glucoseLevels || this.glucose[userId]
 
 		if (!glucoseLevels) {
 			return {}
@@ -113,7 +113,8 @@ module.exports = class MemberManager {
 		}, 0)
 		const average = glucoseLevels.reduce((acc, val) => {
 			acc += val
-		}, 0)/glucoseLevels.length || 0
+			return acc
+		}, 0)/(glucoseLevels.length || 1)
 		const highest = !glucoseLevels || !glucoseLevels.length ? 0 : Math.max(...glucoseLevels)
 		const lowest =  !glucoseLevels || !glucoseLevels.length ? 0 : Math.min(...glucoseLevels)
 		const deviation = (highest - lowest) || 0
@@ -125,6 +126,14 @@ module.exports = class MemberManager {
 			hypos,
 			glucoseLevels
 		}
+	}
+
+	getPeerMetrics(userId) {
+		const glucoseLevels = this.findSimilar(userId)
+			.map(userId => this.glucose[userId])
+			.filter(glucoseLevels => glucoseLevels.filter(glucoseLevel => glucoseLevel.time > (Date.now() - 60*60*1000*7*24)/1000))
+
+		return glucoseLevels.map(glucoseLevelSet => this.getUserDashboard(userId, glucoseLevelSet))
 	}
 
 	getTimeline(userId) {
@@ -212,6 +221,27 @@ module.exports = class MemberManager {
 	findSimilar(userId) {
 		const patient = this.patients[userId]
 		const { age, income, locale, gender } = patient
+
+		const similar = []
+		for (let [id, otherPatient] of Object.entries(this.patients)) {
+			if (similar.length >= 30) {
+				break
+			}
+
+			if (otherPatient.gender != patient.gender) {
+				continue
+			}
+
+			if (otherPatient.locale == patient.locale && (patient.age > otherPatient.age - 3 && patient.age < otherPatient.age + 3) {
+				similar.push(otherPatient.uuid)
+			} else if (otherPatient.age == patient.age) {
+				similar.push(otherPatient.uuid)
+			} else if (patient.income > otherPatient.income - 5000 && patient.income < otherPatient.income + 5000) {
+				similar.push(otherPatient.uuid)
+			}
+		}
+
+		return similar
 	}
 }
 
