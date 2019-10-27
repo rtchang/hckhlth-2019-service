@@ -11,7 +11,6 @@ const Config = require('./config.js')
 
 const memberManager = new MemberManager()
 const ClientOAuth2 = require('client-oauth2')
-
 const azureAuth = new ClientOAuth2({
   clientId: Config.CLIENT_ID,
   clientSecret: Config.CLIENT_SECRET,
