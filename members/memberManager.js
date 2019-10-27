@@ -101,8 +101,8 @@ module.exports = class MemberManager {
 		const average = glucoseLevels.reduce((acc, val) => {
 			acc += val
 		}, 0)/glucoseLevels.length || 0
-		const highest = Math.max(...glucoseLevels)
-		const lowest = Math.min(...glucoseLevels)
+		const highest = !glucoseLevels || !glucoseLevels.length ? 0 : Math.max(...glucoseLevels)
+		const lowest =  !glucoseLevels || !glucoseLevels.length ? 0 : Math.min(...glucoseLevels)
 		const deviation = (highest - lowest) || 0
 
 		return {
