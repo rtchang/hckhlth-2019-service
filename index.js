@@ -6,6 +6,21 @@ const PORT = process.env.PORT || 5000
 const AggregatePatientWorkflow = require('./fhir/aggregatePatientWorkflow.js')
 const AggregateGlucoseWorkflow = require('./fhir/aggregateGlucoseWorkflow.js')
 const DexcomGlucoseWorkflow = require('./dexcom/dexcomGlucoseWorkflow.js')
+const MemberManager = require('./members/memberManager.js')
+const Config = require('./config.js')
+
+const memberManager = new MemberManager()
+const ClientOAuth2 = require('client-oauth2')
+
+const azureAuth = new ClientOAuth2({
+  clientId: Config.clientId,
+  clientSecret: Config.cliientSecret,
+  accessTokenUri: 'https://login.microsoftonline.com/79fe009c-79e0-4bc9-baec-a76d3145bde5/oauth2/token',
+  authorizationUri: 'https://login.microsoftonline.com/79fe009c-79e0-4bc9-baec-a76d3145bde5/oauth2/authorize?resource=https://azurehealthcareapis.com',
+  redirectUri: 'http://localhost:5000/auth/azure/callback',
+//  redirectUri: 'https://hlth.azurewebsites.net/auth/azure/callback',
+  scopes: ['notifications', 'gist']
+})
 
 const app = express()
   .use(bodyParser.urlencoded({ extended: false }))
@@ -26,7 +41,7 @@ app.use((req, res, next) => {
 // because then we could handle intercept for authentication
 // and all the nice jazz, then move to JWT and whatnot later
 
-const memberApi = new MemberApi(app)
+const memberApi = new MemberApi(app, memberManager)
 memberApi.getUser()
 memberApi.getUserDashboard()
 memberApi.addEvent()
@@ -42,16 +57,21 @@ memberApi.updateIncome()
 app.get('/start-aggregate-patient-workflow', (req, res) => {
   const { source } = req.body
 
-  const aggregatePatientWorkflow = new AggregatePatientWorkflow(source)
+  if (source == null) {
+    sign('get', Config.FHIR_URL + "Patient")
+      .then(accessToken => {
+        const aggregatePatientWorkflow = new AggregatePatientWorkflow(source, memberManager)
 
-  aggregatePatientWorkflow.execute()
-  res.sendStatus(201)
+        aggregatePatientWorkflow.execute()
+        res.sendStatus(201)
+      })
+  }
 })
 
 app.get('/start-aggregate-glucose-workflow', (req, res) => {
   const { source } = req.body
 
-  const aggregateGlucoseWorkflow = new AggregateGlucoseWorkflow(source)
+  const aggregateGlucoseWorkflow = new AggregateGlucoseWorkflow(source, memberManager)
 
   aggregateGlucoseWorkflow.execute()
   res.sendStatus(201)
@@ -61,9 +81,45 @@ app.get('/start-dexcom-glucose-workflow', (req, res) => {
   //TODO(have some permissioning instead of passing userId and not checking it *awkward*)
   const { userId, startDate, endDate } = req.body
 
-  const dexcomGlucoseWorkflow = new DexcomGlucoseWorkflow()
+  const dexcomGlucoseWorkflow = new DexcomGlucoseWorkflow(memberManager)
 
   dexcomGlucoseWorkflow.execute(userId, startDate, endDate)
 })
+
+// oath thing
+app.get('/auth/azure', function (req, res) {
+  var uri = azureAuth.code.getUri()
+ 
+  res.redirect(uri)
+})
+ 
+app.get('/auth/azure/callback', function (req, res) {
+  sign('get', req.originalUrl)
+    .then(res.send)
+})
+
+function sign(method, url) {
+  return new Promise((resolve, reject) => {
+    console.log('what is going on', url)
+    azureAuth.code.getToken('https://hlth.azurewebsites.net/auth/azure/callback')
+      .then(function (user) {
+        console.log(user) //=> { accessToken: '...', tokenType: 'bearer', ... }
+   
+        // Refresh the current users access token.
+        user.refresh().then(function (updatedUser) {
+          console.log(updatedUser !== user) //=> true
+          console.log(updatedUser.accessToken)
+        })
+   
+        // Sign API requests on behalf of the current user.
+        user.sign({
+          method,
+          url
+        })
+
+        resolve(user.accessToken)
+      })
+  })
+}
 
 app.listen(PORT, () => console.log(`Listening on ${ PORT }`))

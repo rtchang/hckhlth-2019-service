@@ -1,9 +1,7 @@
-const MemberManager = require('./memberManager.js')
-
 module.exports = class MemberController {
-	constructor(app) {
+	constructor(app, memberManager) {
 		this.app = app
-		this.memberManager = new MemberManager()
+		this.memberManager = memberManager
 	}
 
 	getUser() {

@@ -1,13 +1,12 @@
 const https = require('https')
-const MemberManager = require('../members/memberManager.js')
 
 // TODO(actually have member permission to support OAuth properly)
 // going to not commit my token...
 const STUB_TOKEN = ''
 
 module.exports = class DexcomGlucoseWorkflow {
-	constructor() {
-		this.memberManager = new MemberManager()
+	constructor(memberManager) {
+		this.memberManager = memberManager
 	}
 
 	execute(userId, startDate, endDate) {
