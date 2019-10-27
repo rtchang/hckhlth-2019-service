@@ -55,15 +55,15 @@ memberApi.updateIncome()
 app.get('/start-aggregate-patient-workflow', (req, res) => {
   const { source } = req.body
 
-  if (source == null) {
-    sign('get', Config.FHIR_URL)
-      .then(accessToken => {
+//  if (source == null) {
+//    sign('get', Config.FHIR_URL)
+//      .then(accessToken => {
         const aggregatePatientWorkflow = new AggregatePatientWorkflow(source, memberManager)
 
         aggregatePatientWorkflow.execute()
         res.sendStatus(201)
-      })
-  }
+//      })
+//  }
 })
 
 app.get('/start-aggregate-glucose-workflow', (req, res) => {
@@ -87,7 +87,6 @@ app.get('/start-dexcom-glucose-workflow', (req, res) => {
 // oath thing
 app.get('/auth/azure', function (req, res) {
   var uri = azureAuth.code.getUri()
- 
   res.redirect(uri)
 })
  
@@ -103,13 +102,11 @@ function sign(method, url) {
       .then(function (user) {
         console.log(user) //=> { accessToken: '...', tokenType: 'bearer', ... }
    
-        // Refresh the current users access token.
         user.refresh().then(function (updatedUser) {
           console.log(updatedUser !== user) //=> true
           console.log(updatedUser.accessToken)
         })
    
-        // Sign API requests on behalf of the current user.
         user.sign({
           method,
           url: 'https://hlth.azurewebsites.net/auth/azure/callback'
