@@ -17,6 +17,12 @@ app.use((req, res, next) => {
   next()
 })
 
+// yea, this isn't going to scale out really well
+// probably swap this over to Azure and spin up a
+// jvm server where we will program in kotlin
+// because then we could handle intercept for authentication
+// and all the nice jazz, then move to JWT and whatnot later
+
 const memberApi = new MemberApi(app)
 memberApi.getUser()
 memberApi.getUserDashboard()

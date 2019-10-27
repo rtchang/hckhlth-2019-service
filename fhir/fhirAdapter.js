@@ -1,46 +1,63 @@
-// lantus - basal
-
-//humalog - bosal
-
-{
-  "resourceType" : "MedicationAdministration",
-  // from Resource: id, meta, implicitRules, and language
-  // from DomainResource: text, contained, extension, and modifierExtension
-  "identifier" : [{ Identifier }], // External identifier
-  "instantiates" : ["<uri>"], // Instantiates protocol or definition
-  "partOf" : [{ Reference(MedicationAdministration|Procedure) }], // Part of referenced event
-  "status" : "<code>", // R!  in-progress | not-done | on-hold | completed | entered-in-error | stopped | unknown
-  "statusReason" : [{ CodeableConcept }], // Reason administration not performed
-  "category" : { CodeableConcept }, // Type of medication usage
-  // medication[x]: What was administered. One of these 2:
-  "medicationCodeableConcept" : { CodeableConcept },
-  "medicationReference" : { Reference(Medication) },
-  "subject" : { Reference(Patient|Group) }, // R!  Who received medication
-  "context" : { Reference(Encounter|EpisodeOfCare) }, // Encounter or Episode of Care administered as part of
-  "supportingInformation" : [{ Reference(Any) }], // Additional information to support administration
-  // effective[x]: Start and end time of administration. One of these 2:
-  "effectiveDateTime" : "<dateTime>",
-  "effectivePeriod" : { Period },
-  "performer" : [{ // Who performed the medication administration and what they did
-    "function" : { CodeableConcept }, // Type of performance
-    "actor" : { Reference(Practitioner|PractitionerRole|Patient|RelatedPerson|
-    Device) } // R!  Who performed the medication administration
-  }],
-  "reasonCode" : [{ CodeableConcept }], // Reason administration performed
-  "reasonReference" : [{ Reference(Condition|Observation|DiagnosticReport) }], // Condition or observation that supports why the medication was administered
-  "request" : { Reference(MedicationRequest) }, // Request administration performed against
-  "device" : [{ Reference(Device) }], // Device used to administer
-  "note" : [{ Annotation }], // Information about the administration
-  "dosage" : { // Details of how medication was taken
-    "text" : "<string>", // Free text dosage instructions e.g. SIG
-    "site" : { CodeableConcept }, // Body site administered to
-    "route" : { CodeableConcept }, // Path of substance into body
-    "method" : { CodeableConcept }, // How drug was administered
-    "dose" : { Quantity(SimpleQuantity) }, // Amount of medication per dose
-    // rate[x]: Dose quantity per unit of time. One of these 2:
-    "rateRatio" : { Ratio }
-    "rateQuantity" : { Quantity(SimpleQuantity) }
-  },
-  "eventHistory" : [{ Reference(Provenance) }] // A list of events of interest in the lifecycle
+module.exports = {
+	createBasalEntry,
+	createBosalEntry
 }
 
+function createBasalEntry(patient, uuid, dose) {
+	return createDose(patient, "Lantus", uuid, dose)
+}
+
+function createBosalEntry(patient, uuid, dose) {
+	return createDose(patient, "Humalog", uuid, dose)
+}
+
+// example from https://www.hl7.org/fhir/medicationadministration0312.json.html
+function createDose(patient, name, uuid, dose) {
+	return {
+		"resourceType": "MedicationAdministration",
+		"id": "medicationadministration0312",
+		"identifier": [
+			{
+			  "use": "casual",
+			  "system": "https://hlth.azurewebsites.net/",
+			  "value": uuid
+			}
+		],
+		"status": "completed",
+		"medicationCodeableConcept": {
+		"coding": [
+		  {
+		    "system": "https://hlth.azurewebsites.net/",
+		    "code": uuid,
+		    "display": name
+		  }
+		]
+		},
+		"subject": {
+			"reference": patient.uuid,
+			"display": patient.name
+		},
+		"effectivePeriod": {
+			"start": new Date(time)+'',
+			"end": new Date(time)+''
+		},
+		"performer": [
+			{
+			  "actor": {
+			    "reference": patient.uuid,
+			    "display": patient.name
+			  }
+			}
+		],
+		"request": {
+			"reference": "MedicationRequest/" + uuid
+		},
+		"dosage": {
+			"text": "",
+			"dose": {
+			  "value": dose.amount,
+			  "unit": "mL"
+			}
+		}
+}
+}

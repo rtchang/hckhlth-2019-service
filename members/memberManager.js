@@ -1,8 +1,13 @@
 const Member = require('./member.js')
 const Dose = require('./dose.js')
+const FhirAdapter = require('../fhir/fhirAdapter.js')
+const https = require('https')
+
+const FHIR_URL = 'https://fhir-hlth.azurehealthcareapis.com/'
 
 module.exports = class MemberManager {
 	constructor() {
+		// some initial data, for production this should be moved to a more permanent store
 		this.doses = {
 			'fake': {
 				'69547604-8fba-4130-a6c8-81edbe5053ea': new Dose('69547604-8fba-4130-a6c8-81edbe5053ea', 'BOLUS', '10', '1572048000'),
@@ -111,7 +116,10 @@ module.exports = class MemberManager {
 		}
 
 		const id = uuidv4()
-		this.doses[userId][id] = new Dose(id, dose, amount, Date.now()/1000)
+		const dose = this.doses[userId][id] = new Dose(id, dose, amount, Date.now()/1000)
+
+		const payload = getDoseFhir()
+		handleFhir('POST', 'MedicationAdministration', payload)
 	}
 
 	updateDose(userId, doseId, amount) {
@@ -135,6 +143,32 @@ module.exports = class MemberManager {
 
 		delete this.doses[userId][doseId]
 	}
+}
+
+function getDoseFhir() {
+	if (dose === 'BASAL') {
+		return FhirAdapter.createBasalEntry(patient, uuidv4(), dose)
+	} else if (dose === 'BOLUS') {
+		return FhirAdapter.createBolusEntry(patient, uuidv4(), dose)
+	} else {
+		return null
+	}
+}
+
+// TODO(fully test this against real data)
+function handleFhir(method, path, payload) {
+	const req = https.request({
+		hostname: FHIR_URL + path,
+		port: 443,
+		method,
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	})
+
+	req.on('error', console.error)
+	payload && req.write(payload)
+	req.end()
 }
 
 function uuidv4() {
