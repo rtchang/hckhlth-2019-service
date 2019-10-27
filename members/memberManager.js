@@ -120,6 +120,7 @@ module.exports = class MemberManager {
 		const deviation = (highest - lowest) || 0
 
 		return {
+			hba1c: (46.7 + average)/28.7,	// assuming mg/dL
 			average,
 			deviation,
 			hypers,
@@ -232,7 +233,7 @@ module.exports = class MemberManager {
 				continue
 			}
 
-			if (otherPatient.locale == patient.locale && (patient.age > otherPatient.age - 3 && patient.age < otherPatient.age + 3) {
+			if (otherPatient.locale == patient.locale && (patient.age > otherPatient.age - 3 && patient.age < otherPatient.age + 3)) {
 				similar.push(otherPatient.uuid)
 			} else if (otherPatient.age == patient.age) {
 				similar.push(otherPatient.uuid)
